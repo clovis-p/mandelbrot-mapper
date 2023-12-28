@@ -6,6 +6,7 @@
 #include "main.h"
 
 #include <math.h>
+#include <time.h>
 
 #define MAX_ITERATIONS 256
 
@@ -14,7 +15,11 @@
 
 // I didn't really think this through, this is a trial and error thing.
 // Funny things happen to the colors when this number is changed.
-#define FUNNY_NUMBER 300000
+#define FUNNY_NUMBER (-985432)
+
+// 1 = use the number defined above
+// 0 = use a random number
+#define USE_FUNNY_NUMBER 1
 
 static int isStable(double x);
 static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint);
@@ -38,13 +43,26 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 
     SDL_Color color = {0, 0, 0, 255};
 
+    int funnyNumber;
+
+    if (!USE_FUNNY_NUMBER)
+    {
+        srand(time(NULL));
+        funnyNumber = rand() % 1000000000 - 500000000;
+        printf("Funny number = %d\n", funnyNumber);
+    }
+    else
+    {
+        funnyNumber = FUNNY_NUMBER;
+    }
+
     for (currentPixel.x = 0; currentPixel.x < RESOLUTION_X; currentPixel.x++)
     {
         for (currentPixel.y = 0; currentPixel.y < RESOLUTION_X; currentPixel.y++)
         {
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixel);
 
-            color = hexToSDLColor(FUNNY_NUMBER * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
+            color = hexToSDLColor(funnyNumber * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
 
             SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
 
