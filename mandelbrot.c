@@ -51,15 +51,6 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     return mandelbrotTexture;
 }
 
-void test1()
-{
-    SDL_Point screenPoint = {320, 0};
-    scanf("%d", &screenPoint.y);
-    DPoint result = convertScreenPointToMandelbrotPoint(screenPoint);
-    printf("x: %f, y: %f\n", result.x, result.y);
-
-}
-
 static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint)
 {
     DPoint mandelbrotPoint;
