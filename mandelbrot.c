@@ -86,38 +86,12 @@ static int isPartOfMandelbrotSet(double re, double im)
         zReal = zRealTemp;
         zImag = zImagTemp;
 
-        if (!isStable(zReal) || !isStable(zImag))
-        {
-            return 0; // Point not in Mandelbrot set
-        }
-
         // If the magnitude of z becomes too large, consider it unstable
-        if (sqrt(zReal * zReal + zImag * zImag) > MAX_ITERATIONS)
+        if (sqrt(zReal * zReal + zImag * zImag) > UNSTABLE_THRESHOLD)
         {
             return 0; // Point not in Mandelbrot set
         }
     }
 
     return 1; // Point in Mandelbrot set
-}
-
-// Checks if the number passed is stable when squaring it MAX_ITERATIONS times
-static int isStable(double x)
-{
-    // square x MAX_ITERATIONS times
-    for (int i = 0; i < MAX_ITERATIONS; i++)
-    {
-        x *= x;
-    }
-
-    if (x > UNSTABLE_THRESHOLD)
-    {
-        // x is unstable
-        return 0;
-    }
-    else
-    {
-        // x is stable
-        return 1;
-    }
 }
