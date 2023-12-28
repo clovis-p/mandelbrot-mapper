@@ -37,8 +37,7 @@ int main()
 
     SDL_Event event;
 
-    SDL_Texture* mandelbrotTexture;
-    mandelbrotTexture = mapMandelbrotSet(ren);
+    SDL_Texture* mandelbrotTexture = mapMandelbrotSet(ren);
 
     while (1)
     {
