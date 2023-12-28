@@ -7,14 +7,19 @@
 
 #include <math.h>
 
-#define MAX_ITERATIONS 255
+#define MAX_ITERATIONS 256
 
 // If a number squared MAX_ITERATIONS times is greater than UNSTABLE_THRESHOLD, it is considered unstable
 #define UNSTABLE_THRESHOLD 100000
 
+// I didn't really think this through, this is a trial and error thing.
+// Funny things happen to the colors when this number is changed.
+#define FUNNY_NUMBER 300000
+
 static int isStable(double x);
 static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint);
-static int isOutsideOfMandelbrotSet(double re, double im);
+static Uint32 isOutsideOfMandelbrotSet(double re, double im);
+static SDL_Color hexToSDLColor(Uint32 hexValue);
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
@@ -31,7 +36,7 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     SDL_Point currentPixel = {0, 0};
     DPoint mandelbrotCoords = {0, 0};
 
-    int color = 0;
+    SDL_Color color = {0, 0, 0, 255};
 
     for (currentPixel.x = 0; currentPixel.x < RESOLUTION_X; currentPixel.x++)
     {
@@ -39,9 +44,9 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
         {
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixel);
 
-            color = isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y);
+            color = hexToSDLColor(FUNNY_NUMBER * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
 
-            SDL_SetRenderDrawColor(ren, color, color, color, 255);
+            SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
 
             SDL_RenderDrawPoint(ren, currentPixel.x, currentPixel.y);
         }
@@ -64,7 +69,7 @@ static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint)
     return mandelbrotPoint;
 }
 
-static int isOutsideOfMandelbrotSet(double re, double im)
+static Uint32 isOutsideOfMandelbrotSet(double re, double im)
 {
     double zReal = 0.0;
     double zImag = 0.0;
@@ -84,4 +89,15 @@ static int isOutsideOfMandelbrotSet(double re, double im)
     }
 
     return 0; // Point in Mandelbrot set
+}
+
+static SDL_Color hexToSDLColor(Uint32 hexValue)
+{
+    SDL_Color color;
+    color.r = (hexValue >> 16) & 0xFF; // Extracting red component
+    color.g = (hexValue >> 8) & 0xFF;  // Extracting green component
+    color.b = hexValue & 0xFF;         // Extracting blue component
+    color.a = 255;                     // Setting alpha channel to opaque (255)
+
+    return color;
 }
