@@ -4,9 +4,8 @@
 
 #include <stdio.h>
 
-#include <SDL2/SDL.h>
-
 #include "main.h"
+#include "mandelbrot.h"
 
 int main()
 {
@@ -36,6 +35,8 @@ int main()
         return 1;
     }
 
+    SDL_Texture* mandelbrotTexture = mapMandelbrotSet(ren);
+
     SDL_Event event;
 
     while (1)
@@ -50,6 +51,7 @@ int main()
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
     }
 
