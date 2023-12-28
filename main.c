@@ -17,7 +17,7 @@ int main()
     }
 
     SDL_Window* win = SDL_CreateWindow("Mandelbrot Mapper", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                       640,480,SDL_WINDOW_SHOWN);
+                                       RESOLUTION_X, RESOLUTION_Y, SDL_WINDOW_SHOWN);
 
     if (win == NULL)
     {
