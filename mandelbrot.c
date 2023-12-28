@@ -7,14 +7,14 @@
 
 #include <math.h>
 
-#define MAX_ITERATIONS 100
+#define MAX_ITERATIONS 255
 
 // If a number squared MAX_ITERATIONS times is greater than UNSTABLE_THRESHOLD, it is considered unstable
 #define UNSTABLE_THRESHOLD 100000
 
 static int isStable(double x);
 static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint);
-static int isPartOfMandelbrotSet(double re, double im);
+static int isOutsideOfMandelbrotSet(double re, double im);
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
@@ -31,19 +31,18 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     SDL_Point currentPixel = {0, 0};
     DPoint mandelbrotCoords = {0, 0};
 
+    int color = 0;
+
     for (currentPixel.x = 0; currentPixel.x < RESOLUTION_X; currentPixel.x++)
     {
         for (currentPixel.y = 0; currentPixel.y < RESOLUTION_X; currentPixel.y++)
         {
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixel);
-            if (isPartOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y))
-            {
-                SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-            }
+
+            color = isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y);
+
+            SDL_SetRenderDrawColor(ren, color, color, color, 255);
+
             SDL_RenderDrawPoint(ren, currentPixel.x, currentPixel.y);
         }
     }
@@ -74,7 +73,7 @@ static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint)
     return mandelbrotPoint;
 }
 
-static int isPartOfMandelbrotSet(double re, double im)
+static int isOutsideOfMandelbrotSet(double re, double im)
 {
     double zReal = 0.0;
     double zImag = 0.0;
@@ -89,9 +88,9 @@ static int isPartOfMandelbrotSet(double re, double im)
         // If the magnitude of z becomes too large, consider it unstable
         if (sqrt(zReal * zReal + zImag * zImag) > UNSTABLE_THRESHOLD)
         {
-            return 0; // Point not in Mandelbrot set
+            return i; // Point not in Mandelbrot set
         }
     }
 
-    return 1; // Point in Mandelbrot set
+    return 0; // Point in Mandelbrot set
 }
