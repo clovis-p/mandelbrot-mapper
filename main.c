@@ -37,7 +37,13 @@ int main()
 
     SDL_Event event;
 
+    printf("Computing the Mandelbrot set...\n");
+    Uint32 ticksBefore = SDL_GetTicks();
+
     SDL_Texture* mandelbrotTexture = mapMandelbrotSet(ren);
+
+    Uint32 elapsedTime = SDL_GetTicks() - ticksBefore;
+    printf("Done! (%dms)\n", elapsedTime);
 
     while (1)
     {
