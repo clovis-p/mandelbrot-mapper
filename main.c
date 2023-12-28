@@ -26,6 +26,16 @@ int main()
         return 1;
     }
 
+    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+    if (ren == NULL)
+    {
+        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        return 1;
+    }
+
     SDL_Event event;
 
     while (1)
@@ -37,8 +47,13 @@ int main()
                 break;
             }
         }
+
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+        SDL_RenderClear(ren);
+        SDL_RenderPresent(ren);
     }
 
+    SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
 
