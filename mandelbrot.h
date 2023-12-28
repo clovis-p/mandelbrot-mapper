@@ -7,7 +7,6 @@
 
 #include <SDL2/SDL.h>
 
-void test1();
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren);
 
 typedef struct
