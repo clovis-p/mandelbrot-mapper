@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "main.h"
+#include "events.h"
 #include "mandelbrot.h"
 
 int main()
@@ -35,8 +36,6 @@ int main()
         return 1;
     }
 
-    SDL_Event event;
-
     printf("Computing the Mandelbrot set...\n");
     Uint32 ticksBefore = SDL_GetTicks();
 
@@ -45,15 +44,9 @@ int main()
     Uint32 elapsedTime = SDL_GetTicks() - ticksBefore;
     printf("Done! (%dms)\n", elapsedTime);
 
-    while (1)
+    while (!quit)
     {
-        if (SDL_WaitEvent(&event))
-        {
-            if (event.type == SDL_QUIT || event.window.event == SDL_WINDOWEVENT_CLOSE)
-            {
-                break;
-            }
-        }
+        handleEvents();
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
