@@ -49,8 +49,8 @@ int main()
         elapsedTime = SDL_GetTicks() - ticksBefore;
         printf("%dms\n", elapsedTime);
 
-        SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-        SDL_RenderClear(ren);
+        //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+        //SDL_RenderClear(ren);
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
     }
