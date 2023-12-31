@@ -7,6 +7,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "main.h"
+
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren);
 
 typedef struct
@@ -15,6 +17,13 @@ typedef struct
     double imaginary;
 } complex_s;
 
+typedef struct
+{
+    double viewWidth;
+    double viewHeight;
+    DPoint centerPoint;
+} view_s;
 
+extern view_s view;
 
 #endif //MANDELBROT_MAPPER_MANDELBROT_H

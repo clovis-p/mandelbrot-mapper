@@ -19,12 +19,15 @@
 
 // 1 = use the number defined above
 // 0 = use a random number
-#define USE_FUNNY_NUMBER 1
+#define USE_FUNNY_NUMBER 0
 
 static int isStable(double x);
-static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint topLeftCorner);
+static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint centerPoint);
 static Uint32 isOutsideOfMandelbrotSet(double re, double im);
 static SDL_Color hexToSDLColor(Uint32 hexValue);
+
+view_s view = {RESOLUTION_X, RESOLUTION_Y,
+               ((double)LAST_X_PIXEL / 2), ((double)LAST_Y_PIXEL / 2)};
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
@@ -63,8 +66,8 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
         {
             currentPixelD.x = (double)currentPixel.x;
             currentPixelD.y = (double)currentPixel.y;
-            DPoint topLeftCorner = {0 ,0};
-            mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, (double)mouse.x, (double)RESOLUTION_Y, topLeftCorner);
+            DPoint topLeftCorner = {(double)RESOLUTION_X / 2 + 190,(double)RESOLUTION_Y / 2 + 35};
+            mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, view.viewWidth, view.viewHeight, view.centerPoint);
 
             color = hexToSDLColor(funnyNumber * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
 
@@ -78,15 +81,15 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     return mandelbrotTexture;
 }
 
-static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint topLeftCorner)
+static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint centerPoint)
 {
     DPoint mandelbrotPoint;
 
-    mandelbrotPoint.x = (double)screenPoint.x / LAST_X_PIXEL * (4 * (viewWidth / RESOLUTION_X)) - (2 * (viewWidth / RESOLUTION_X));
+    mandelbrotPoint.x = (double)screenPoint.x / LAST_X_PIXEL * (4 * (viewWidth / RESOLUTION_X)) - (2 * (viewWidth / RESOLUTION_X)) + (centerPoint.x / LAST_X_PIXEL * 4 - 2);
 
     double yRange = (double)RESOLUTION_Y / RESOLUTION_X;
 
-    mandelbrotPoint.y = (double)screenPoint.y / LAST_Y_PIXEL * 4 * yRange - 2 * yRange;
+    mandelbrotPoint.y = (double)screenPoint.y / LAST_Y_PIXEL * (4 * (viewHeight / RESOLUTION_Y)) * yRange - (2 * (viewHeight / RESOLUTION_Y)) * yRange + (centerPoint.y / LAST_Y_PIXEL * 4 - 2);
 
     return mandelbrotPoint;
 }
