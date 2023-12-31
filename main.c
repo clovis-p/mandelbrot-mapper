@@ -36,26 +36,23 @@ int main()
         return 1;
     }
 
-    printf("Computing the Mandelbrot set...\n");
-    Uint32 ticksBefore = SDL_GetTicks();
-
-    SDL_Texture* mandelbrotTexture = mapMandelbrotSet(ren);
-
-    Uint32 elapsedTime = SDL_GetTicks() - ticksBefore;
-    printf("Done! (%dms)\n", elapsedTime);
+    Uint32 ticksBefore;
+    Uint32 elapsedTime;
+    SDL_Texture* mandelbrotTexture;
 
     SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
 
     while (!quit)
     {
+        ticksBefore = SDL_GetTicks();
         mandelbrotTexture = mapMandelbrotSet(ren);
+        elapsedTime = SDL_GetTicks() - ticksBefore;
+        printf("%dms\n", elapsedTime);
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
-
-        printf("(%d, %d)\n", mouse.x, mouse.y);
     }
 
     SDL_WaitThread(eventThread, NULL);
