@@ -15,10 +15,6 @@ typedef struct
     double imaginary;
 } complex_s;
 
-typedef struct
-{
-    double x;
-    double y;
-} DPoint;
+
 
 #endif //MANDELBROT_MAPPER_MANDELBROT_H

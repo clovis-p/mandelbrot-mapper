@@ -11,7 +11,7 @@
 #define MAX_ITERATIONS 256
 
 // If a number squared MAX_ITERATIONS times is greater than UNSTABLE_THRESHOLD, it is considered unstable
-#define UNSTABLE_THRESHOLD 100000
+#define UNSTABLE_THRESHOLD 1000000
 
 // I didn't really think this through, this is a trial and error thing.
 // Funny things happen to the colors when this number is changed.
@@ -22,7 +22,7 @@
 #define USE_FUNNY_NUMBER 1
 
 static int isStable(double x);
-static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint);
+static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint topLeftCorner);
 static Uint32 isOutsideOfMandelbrotSet(double re, double im);
 static SDL_Color hexToSDLColor(Uint32 hexValue);
 
@@ -39,6 +39,7 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     SDL_SetRenderTarget(ren, mandelbrotTexture);
 
     SDL_Point currentPixel = {0, 0};
+    DPoint currentPixelD = {0, 0,};
     DPoint mandelbrotCoords = {0, 0};
 
     SDL_Color color = {0, 0, 0, 255};
@@ -60,7 +61,10 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     {
         for (currentPixel.y = 0; currentPixel.y < RESOLUTION_X; currentPixel.y++)
         {
-            mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixel);
+            currentPixelD.x = (double)currentPixel.x;
+            currentPixelD.y = (double)currentPixel.y;
+            DPoint topLeftCorner = {0 ,0};
+            mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, (double)mouse.x, (double)RESOLUTION_Y, topLeftCorner);
 
             color = hexToSDLColor(funnyNumber * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
 
@@ -74,11 +78,11 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     return mandelbrotTexture;
 }
 
-static DPoint convertScreenPointToMandelbrotPoint(SDL_Point screenPoint)
+static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint topLeftCorner)
 {
     DPoint mandelbrotPoint;
 
-    mandelbrotPoint.x = (double)screenPoint.x / LAST_X_PIXEL * 4 - 2;
+    mandelbrotPoint.x = (double)screenPoint.x / LAST_X_PIXEL * (4 * (viewWidth / RESOLUTION_X)) - (2 * (viewWidth / RESOLUTION_X));
 
     double yRange = (double)RESOLUTION_Y / RESOLUTION_X;
 
@@ -92,7 +96,8 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
     double zReal = 0.0;
     double zImag = 0.0;
 
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
+    for (int i = 0; i < MAX_ITERATIONS; ++i)
+    {
         double zRealTemp = zReal * zReal - zImag * zImag + re;
         double zImagTemp = 2 * zReal * zImag + im;
 
@@ -102,7 +107,9 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
         // If the magnitude of z becomes too large, consider it unstable
         if (sqrt(zReal * zReal + zImag * zImag) > UNSTABLE_THRESHOLD)
         {
-            return i; // Point not in Mandelbrot set
+            // If the point is not in the Mandelbrot set, we return the number of iterations it took before the
+            // unstable threshold was passed. This will be used to assign a color to the current pixel.
+            return i;
         }
     }
 

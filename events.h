@@ -5,6 +5,6 @@
 #ifndef MANDELBROT_MAPPER_EVENTS_H
 #define MANDELBROT_MAPPER_EVENTS_H
 
-void handleEvents();
+int handleEvents();
 
 #endif //MANDELBROT_MAPPER_EVENTS_H

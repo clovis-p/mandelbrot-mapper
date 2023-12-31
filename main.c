@@ -44,15 +44,21 @@ int main()
     Uint32 elapsedTime = SDL_GetTicks() - ticksBefore;
     printf("Done! (%dms)\n", elapsedTime);
 
+    SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
+
     while (!quit)
     {
-        handleEvents();
+        mandelbrotTexture = mapMandelbrotSet(ren);
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
+
+        printf("(%d, %d)\n", mouse.x, mouse.y);
     }
+
+    SDL_WaitThread(eventThread, NULL);
 
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);

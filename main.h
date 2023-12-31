@@ -10,6 +10,16 @@
 #define RESOLUTION_X 1920
 #define RESOLUTION_Y 1080
 
+typedef struct
+{
+    double x;
+    double y;
+} DPoint;
+
+extern int quit;
+
+extern SDL_Point mouse;
+
 #define LAST_X_PIXEL (RESOLUTION_X - 1)
 #define LAST_Y_PIXEL (RESOLUTION_Y - 1)
 
