@@ -99,7 +99,7 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
     double zReal = 0.0;
     double zImag = 0.0;
 
-    for (int i = 0; i < MAX_ITERATIONS; ++i)
+    for (int i = 0; i < MAX_ITERATIONS && !quit; ++i)
     {
         double zRealTemp = zReal * zReal - zImag * zImag + re;
         double zImagTemp = 2 * zReal * zImag + im;
