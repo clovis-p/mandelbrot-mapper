@@ -59,6 +59,11 @@ int handleEvents()
         {
             view.centerPoint.y += 50 / (RESOLUTION_Y / view.viewHeight);
         }
+
+        if (event.key.keysym.sym == SDLK_ESCAPE)
+        {
+            quit = 1;
+        }
     }
 
     return 0;

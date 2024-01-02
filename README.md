@@ -5,6 +5,7 @@ Renders the Mandelbrot set.
 * Arrow keys to move around
 * Equals key (=) : zoom in
 * Minus key (-) : zoom out
+* ESC key : quit
 
 Note that zooming too much breaks it and rendering is pretty slow as it is only done with the CPU. I'm getting 1 to 15 frames per second on my machine, depending on the resolution and the complexity of what is currently being rendered.
 
