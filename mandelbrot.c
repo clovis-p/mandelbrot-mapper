@@ -8,8 +8,6 @@
 #include <math.h>
 #include <time.h>
 
-#define MAX_ITERATIONS 256
-
 // If a number squared MAX_ITERATIONS times is greater than UNSTABLE_THRESHOLD, it is considered unstable
 #define UNSTABLE_THRESHOLD 1000000
 
@@ -24,10 +22,13 @@
 static int isStable(double x);
 static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint centerPoint);
 static Uint32 isOutsideOfMandelbrotSet(double re, double im);
+static SDL_Color assignColorToMandelbrotPoint(DPoint point);
 static SDL_Color hexToSDLColor(Uint32 hexValue);
 
 view_s view = {RESOLUTION_X, RESOLUTION_Y,
                ((double)LAST_X_PIXEL / 2), ((double)LAST_Y_PIXEL / 2)};
+
+int maxIterations = 512;
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
@@ -69,7 +70,7 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
             DPoint topLeftCorner = {(double)RESOLUTION_X / 2 + 190,(double)RESOLUTION_Y / 2 + 35};
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, view.viewWidth, view.viewHeight, view.centerPoint);
 
-            color = hexToSDLColor(funnyNumber * isOutsideOfMandelbrotSet(mandelbrotCoords.x, mandelbrotCoords.y));
+            color = assignColorToMandelbrotPoint(mandelbrotCoords);
 
             SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
 
@@ -99,7 +100,7 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
     double zReal = 0.0;
     double zImag = 0.0;
 
-    for (int i = 0; i < MAX_ITERATIONS && !quit; ++i)
+    for (int i = 0; i < maxIterations && !quit; ++i)
     {
         double zRealTemp = zReal * zReal - zImag * zImag + re;
         double zImagTemp = 2 * zReal * zImag + im;
@@ -117,6 +118,14 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
     }
 
     return 0; // Point in Mandelbrot set
+}
+
+// Takes the number of iterations it took for a point to become unstable and returns a color
+static SDL_Color assignColorToMandelbrotPoint(DPoint point)
+{
+    Uint32 hexValue = FUNNY_NUMBER * isOutsideOfMandelbrotSet(point.x, point.y) * 256 / maxIterations;
+
+    return hexToSDLColor(hexValue);
 }
 
 static SDL_Color hexToSDLColor(Uint32 hexValue)
