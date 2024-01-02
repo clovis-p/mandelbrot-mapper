@@ -10,6 +10,8 @@
 #include "main.h"
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren);
+void zoomInViewSize();
+void zoomOutViewSize();
 
 typedef struct
 {

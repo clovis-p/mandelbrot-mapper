@@ -82,6 +82,26 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     return mandelbrotTexture;
 }
 
+void zoomInViewSize()
+{
+    view.viewWidth /= 1.25;
+    view.viewHeight /= 1.25;
+
+    maxIterations *= 1.05;
+    printf("maxIterations = %d\n", maxIterations);
+    printf("View: w = %lf, h = %lf\n", view.viewWidth, view.viewHeight);
+}
+
+void zoomOutViewSize()
+{
+    view.viewWidth *= 1.25;
+    view.viewHeight *= 1.25;
+
+    maxIterations /= 1.05;
+    printf("maxIterations = %d\n", maxIterations);
+    printf("View: w = %lf, h = %lf\n", view.viewWidth, view.viewHeight);
+}
+
 static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint centerPoint)
 {
     DPoint mandelbrotPoint;

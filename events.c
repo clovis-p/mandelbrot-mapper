@@ -31,14 +31,12 @@ int handleEvents()
 
         if (shouldPerformKeyAction(SDL_SCANCODE_EQUALS))
         {
-            view.viewWidth /= 1.25;
-            view.viewHeight /= 1.25;
+            zoomInViewSize();
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_MINUS))
         {
-            view.viewWidth *= 1.25;
-            view.viewHeight *= 1.25;
+            zoomOutViewSize();
         }
 
 
@@ -61,8 +59,6 @@ int handleEvents()
         {
             view.centerPoint.y += 50 / (RESOLUTION_Y / view.viewHeight);
         }
-
-        printf("View: w = %f, h = %f\n", view.viewWidth, view.viewHeight);
     }
 
     return 0;
