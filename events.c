@@ -18,6 +18,8 @@ int handleEvents()
 
     keyStates = SDL_GetKeyboardState(NULL);
 
+    double aspectRatio = (double)RESOLUTION_X / RESOLUTION_Y;
+
     while (SDL_WaitEvent(&event) && !quit)
     {
         if (event.type == SDL_QUIT || event.window.event == SDL_WINDOWEVENT_CLOSE)
@@ -29,15 +31,16 @@ int handleEvents()
 
         if (shouldPerformKeyAction(SDL_SCANCODE_EQUALS))
         {
-            view.viewWidth -= 50;
-            view.viewHeight -= 50 * ((double)RESOLUTION_Y / RESOLUTION_X);
+            view.viewWidth /= 1.25;
+            view.viewHeight /= 1.25;
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_MINUS))
         {
-            view.viewWidth += 50;
-            view.viewHeight += 50 * ((double)RESOLUTION_Y / RESOLUTION_X);
+            view.viewWidth *= 1.25;
+            view.viewHeight *= 1.25;
         }
+
 
         if (shouldPerformKeyAction(SDL_SCANCODE_RIGHT))
         {
@@ -58,6 +61,8 @@ int handleEvents()
         {
             view.centerPoint.y += 50 / (RESOLUTION_Y / view.viewHeight);
         }
+
+        printf("View: w = %f, h = %f\n", view.viewWidth, view.viewHeight);
     }
 
     return 0;
