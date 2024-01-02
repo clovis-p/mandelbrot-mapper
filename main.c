@@ -17,7 +17,7 @@ int main()
     }
 
     SDL_Window* win = SDL_CreateWindow("Mandelbrot Mapper", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                       RESOLUTION_X, RESOLUTION_Y, SDL_WINDOW_SHOWN);
+                                       RESOLUTION_X, RESOLUTION_Y, WINDOW_FLAGS);
 
     if (win == NULL)
     {
@@ -47,7 +47,6 @@ int main()
         ticksBefore = SDL_GetTicks();
         mandelbrotTexture = mapMandelbrotSet(ren);
         elapsedTime = SDL_GetTicks() - ticksBefore;
-        printf("%dms\n", elapsedTime);
 
         //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         //SDL_RenderClear(ren);

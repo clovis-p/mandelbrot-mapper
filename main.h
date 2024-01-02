@@ -7,8 +7,9 @@
 
 #include <SDL2/SDL.h>
 
-#define RESOLUTION_X 1920
-#define RESOLUTION_Y 1080
+#define RESOLUTION_X 1024
+#define RESOLUTION_Y 600
+#define WINDOW_FLAGS SDL_WINDOW_SHOWN
 
 typedef struct
 {
