@@ -29,7 +29,8 @@ static SDL_Color hexToSDLColor(Uint32 hexValue);
 view_s view = {RESOLUTION_X, RESOLUTION_Y,
                ((double)LAST_X_PIXEL / 2), ((double)LAST_Y_PIXEL / 2)};
 
-int maxIterations = 512;
+#define INITIAL_MAX_ITERATIONS 512
+int maxIterations = INITIAL_MAX_ITERATIONS;
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
@@ -129,7 +130,7 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
         zImag = zImagTemp;
 
         // If the magnitude of z becomes too large, consider it unstable
-        if (sqrt(zReal * zReal + zImag * zImag) > UNSTABLE_THRESHOLD)
+        if (zReal * zReal + zImag * zImag > UNSTABLE_THRESHOLD)
         {
             // If the point is not in the Mandelbrot set, we return the number of iterations it took before the
             // unstable threshold was passed. This will be used to assign a color to the current pixel.
@@ -143,7 +144,7 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
 // Takes the number of iterations it took for a point to become unstable and returns a color
 static SDL_Color assignColorToMandelbrotPoint(DPoint point)
 {
-    Uint32 hexValue = FUNNY_NUMBER * isOutsideOfMandelbrotSet(point.x, point.y) * 256 / maxIterations;
+    Uint32 hexValue = (FUNNY_NUMBER * isOutsideOfMandelbrotSet(point.x, point.y) * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
 
     return hexToSDLColor(hexValue);
 }
