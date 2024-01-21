@@ -4,6 +4,7 @@
 
 #include "mandelbrot.h"
 #include "main.h"
+#include "events.h"
 
 #include <math.h>
 #include <time.h>
@@ -17,7 +18,7 @@
 
 // 1 = use the number defined above
 // 0 = use a random number
-#define USE_FUNNY_NUMBER 0
+#define USE_FUNNY_NUMBER 1
 
 static int isStable(double x);
 static DPoint convertScreenPointToMandelbrotPoint(DPoint screenPoint, double viewWidth, double viewHeight, DPoint centerPoint);
@@ -54,7 +55,7 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     {
         srand(time(NULL));
         funnyNumber = rand() % 1000000000 - 500000000;
-        printf("Funny number = %d\n", funnyNumber);
+        //printf("Funny number = %d\n", funnyNumber);
     }
     else
     {
@@ -67,7 +68,6 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
         {
             currentPixelD.x = (double)currentPixel.x;
             currentPixelD.y = (double)currentPixel.y;
-            DPoint topLeftCorner = {(double)RESOLUTION_X / 2 + 190,(double)RESOLUTION_Y / 2 + 35};
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, view.viewWidth, view.viewHeight, view.centerPoint);
 
             color = assignColorToMandelbrotPoint(mandelbrotCoords);
