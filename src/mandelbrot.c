@@ -2,12 +2,12 @@
 // Created by clovis on 12/27/23.
 //
 
+#include <math.h>
+#include <time.h>
+
 #include "mandelbrot.h"
 #include "main.h"
 #include "events.h"
-
-#include <math.h>
-#include <time.h>
 
 // If a number squared MAX_ITERATIONS times is greater than UNSTABLE_THRESHOLD, it is considered unstable
 #define UNSTABLE_THRESHOLD 1000000
