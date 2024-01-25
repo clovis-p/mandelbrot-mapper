@@ -42,6 +42,8 @@ int main()
 
     SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
 
+    allocatePixels();
+
     while (!quit)
     {
         ticksBefore = SDL_GetTicks();
@@ -53,6 +55,8 @@ int main()
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
     }
+
+    freePixels();
 
     SDL_WaitThread(eventThread, NULL);
 

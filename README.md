@@ -7,7 +7,8 @@ Renders the Mandelbrot set.
 * Minus key (-) : zoom out
 * ESC key : quit
 
-Rendering is pretty slow as it is only done with the CPU. I'm getting 1 to 15 frames per second on my machine, depending on the resolution and the complexity of what is currently being rendered.
+## Performance
+Expect anywhere between 0.2 to 30fps depending on the resolution, your hardware and the complexity of what is being rendered. There is no GPU acceleration.
 
 ## Screenshots
 ![Screenshot](https://raw.githubusercontent.com/clovis-p/mandelbrot-mapper/main/screenshot.png)
