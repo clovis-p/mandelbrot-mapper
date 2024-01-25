@@ -32,6 +32,18 @@ view_s view = {RESOLUTION_X, RESOLUTION_Y,
 #define INITIAL_MAX_ITERATIONS 512
 int maxIterations = INITIAL_MAX_ITERATIONS;
 
+Uint32* pixels;
+
+void allocatePixels()
+{
+    pixels = (Uint32*)malloc(RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32));
+}
+
+void freePixels()
+{
+    free(pixels);
+}
+
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
     SDL_Texture* mandelbrotTexture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888,
@@ -41,8 +53,6 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
     {
         printf("Error creating texture: %s\n", SDL_GetError());
     }
-
-    SDL_SetRenderTarget(ren, mandelbrotTexture);
 
     SDL_Point currentPixel = {0, 0};
     DPoint currentPixelD = {0, 0,};
@@ -63,9 +73,9 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
         funnyNumber = FUNNY_NUMBER;
     }
 
-    for (currentPixel.x = 0; currentPixel.x < RESOLUTION_X; currentPixel.x++)
+    for (currentPixel.y = 0; currentPixel.y < RESOLUTION_Y; currentPixel.y++)
     {
-        for (currentPixel.y = 0; currentPixel.y < RESOLUTION_X; currentPixel.y++)
+        for (currentPixel.x = 0; currentPixel.x < RESOLUTION_X; currentPixel.x++)
         {
             currentPixelD.x = (double)currentPixel.x;
             currentPixelD.y = (double)currentPixel.y;
@@ -73,13 +83,12 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 
             color = assignColorToMandelbrotPoint(mandelbrotCoords);
 
-            SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
-
-            SDL_RenderDrawPoint(ren, currentPixel.x, currentPixel.y);
+            pixels[currentPixel.y * RESOLUTION_X + currentPixel.x] = color.r << 24 | color.g << 16 | color.b << 8 | color.a;
         }
     }
 
-    SDL_SetRenderTarget(ren, NULL);
+    SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(Uint32));
+
     return mandelbrotTexture;
 }
 

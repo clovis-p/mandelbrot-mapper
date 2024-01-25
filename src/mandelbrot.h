@@ -9,6 +9,9 @@
 
 #include "main.h"
 
+void allocatePixels();
+void freePixels();
+
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren);
 void zoomInViewSize();
 void zoomOutViewSize();
