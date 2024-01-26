@@ -12,9 +12,18 @@
 void* mandelbrotCompute(void* data);
 
 int lockRendering = 0;
+int openCLInitialized = 0;
 
 int main()
 {
+    pthread_t mandelbrotComputeID;
+    pthread_create(&mandelbrotComputeID, NULL, mandelbrotCompute, NULL);
+
+    while (!openCLInitialized)
+    {
+        SDL_Delay(50);
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -45,9 +54,6 @@ int main()
     Uint32 elapsedTime;
     SDL_Texture* mandelbrotTexture;
 
-    pthread_t mandelbrotComputeID;
-    pthread_create(&mandelbrotComputeID, NULL, mandelbrotCompute, NULL);
-
     //SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
 
     while (!quit)
@@ -61,7 +67,6 @@ int main()
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }
-
 
     //SDL_WaitThread(eventThread, NULL);
     pthread_join(mandelbrotComputeID, NULL);
@@ -85,6 +90,8 @@ void* mandelbrotCompute(void* data)
         printf("Error allocating memory for pixelsTemp\n");
         quit = 1;
     }
+
+    openCLInitialized = 1;
 
     while (!quit)
     {
