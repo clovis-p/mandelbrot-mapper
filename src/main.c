@@ -3,10 +3,15 @@
 //
 
 #include <stdio.h>
+#include <pthread.h>
 
 #include "main.h"
 #include "events.h"
 #include "mandelbrot.h"
+
+void* mandelbrotCompute(void* data);
+
+int lockRendering = 0;
 
 int main()
 {
@@ -26,7 +31,7 @@ int main()
         return 1;
     }
 
-    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
 
     if (ren == NULL)
     {
@@ -40,29 +45,57 @@ int main()
     Uint32 elapsedTime;
     SDL_Texture* mandelbrotTexture;
 
-    SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
+    pthread_t mandelbrotComputeID;
+    pthread_create(&mandelbrotComputeID, NULL, mandelbrotCompute, NULL);
 
-    allocatePixels();
+    //SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
 
     while (!quit)
     {
-        ticksBefore = SDL_GetTicks();
-        mandelbrotTexture = mapMandelbrotSet(ren);
-        elapsedTime = SDL_GetTicks() - ticksBefore;
+        if (!lockRendering)
+        {
+            SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(Uint32));
+        }
 
-        //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-        //SDL_RenderClear(ren);
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
+        SDL_Delay(16);
     }
 
-    freePixels();
 
-    SDL_WaitThread(eventThread, NULL);
+    //SDL_WaitThread(eventThread, NULL);
+    pthread_join(mandelbrotComputeID, NULL);
 
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
 
     return 0;
+}
+
+void* mandelbrotCompute(void* data)
+{
+    allocatePixels();
+
+    cl_s* cl = initOpenCL();
+
+    Uint32* pixelsTemp = (Uint32*)malloc(RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32));
+    if (pixelsTemp == NULL)
+    {
+        printf("Error allocating memory for pixelsTemp\n");
+        quit = 1;
+    }
+
+    while (!quit)
+    {
+        pixelsTemp = mapMandelbrotSet(cl);
+        lockRendering = 1;
+        memcpy(pixels, pixelsTemp, RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32));
+        lockRendering = 0;
+    }
+
+    freePixels();
+    quitOpenCL(cl);
+
+    pthread_exit(NULL);
 }
