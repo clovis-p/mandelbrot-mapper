@@ -3,10 +3,12 @@
 #define RESOLUTION_X 640
 #define RESOLUTION_Y 480
 
+#define FUNNY_NUMBER (-985432)
+
 #define LAST_X_PIXEL (RESOLUTION_X - 1)
 #define LAST_Y_PIXEL (RESOLUTION_Y - 1)
 
-__kernel void computeMandelbrotPixel(__global const double* screenPoints, __global const double* viewParams, const int funnyNumber, __global uint* colors)
+__kernel void computeMandelbrotPixel(__global const double* screenPoints, __global const double* viewParams, __global uint* colors)
 {
     int i = get_global_id(0);
 
@@ -29,6 +31,8 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
     int maxIterations = INITIAL_MAX_ITERATIONS;
     int unstableThreshold = UNSTABLE_THRESHOLD;
 
+    int isInsideOfMandelbrotSet = 0;
+
     int iterations;
     for (iterations = 0; iterations < maxIterations; ++iterations)
     {
@@ -40,10 +44,17 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
 
         if (zReal * zReal + zImag * zImag > unstableThreshold)
         {
-            break;
+            isInsideOfMandelbrotSet = 1;
         }
     }
 
-    uint hexValue = (funnyNumber * iterations * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
-    colors[i] = hexValue;
+    if (isInsideOfMandelbrotSet)
+    {
+        uint hexValue = (FUNNY_NUMBER * iterations * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
+        colors[i] = hexValue;
+    }
+    else
+    {
+        colors[i] = 0x000000;
+    }
 }

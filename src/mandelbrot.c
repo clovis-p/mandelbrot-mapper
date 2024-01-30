@@ -134,7 +134,7 @@ cl_s* initOpenCL()
     // Create buffers and fill those that only need to be filled once
     cl->screenPoints_buf = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, RESOLUTION_X * RESOLUTION_Y * 2 * sizeof(double), NULL, &ret);
     cl->viewParams_buf = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, 4 * sizeof(double), NULL, &ret);
-    cl->funnyNumber_buf = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, sizeof(int), NULL, &ret);
+    //cl->funnyNumber_buf = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, sizeof(int), NULL, &ret);
     cl->colors_buf = clCreateBuffer(cl->context, CL_MEM_WRITE_ONLY, RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32), NULL, &ret);
     if (ret != CL_SUCCESS)
     {
@@ -163,16 +163,6 @@ cl_s* initOpenCL()
         return NULL;
     }
 
-    int funnyNumber_buf = FUNNY_NUMBER;
-    ret = clEnqueueWriteBuffer(cl->commandQueue, cl->funnyNumber_buf, CL_TRUE, 0,
-                         sizeof(int), &funnyNumber_buf, 0, NULL, NULL);
-    if (ret != CL_SUCCESS)
-    {
-        printf("Error writing to funnyNumber_buf\n");
-        quit = 1;
-        return NULL;
-    }
-
     // Create and build a program with the kernel source, then create a kernel from it and set its arguments
     cl->program = clCreateProgramWithSource(cl->context, 1, (const char**)&cl->kernelString, (const size_t*)&kernelSourceSize, &ret);
     if (ret != CL_SUCCESS)
@@ -185,6 +175,13 @@ cl_s* initOpenCL()
     if (ret != CL_SUCCESS)
     {
         printf("Error building program\n");
+        printf("Getting build log...\n");
+
+        size_t len;
+        char buffer[2048];
+        clGetProgramBuildInfo(cl->program, cl->deviceId, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
+        printf("%s\n", buffer);
+
         quit = 1;
         return NULL;
     }
@@ -196,13 +193,27 @@ cl_s* initOpenCL()
         quit = 1;
         return NULL;
     }
+
     ret = clSetKernelArg(cl->kernel, 0, sizeof(cl_mem), (void*)&cl->screenPoints_buf);
-    ret = clSetKernelArg(cl->kernel, 1, sizeof(cl_mem), (void*)&cl->viewParams_buf);
-    ret = clSetKernelArg(cl->kernel, 2, sizeof(cl_mem), (void*)&cl->funnyNumber_buf);
-    ret = clSetKernelArg(cl->kernel, 3, sizeof(cl_mem), (void*)&cl->colors_buf);
     if (ret != CL_SUCCESS)
     {
-        printf("Error setting kernel arguments\n");
+        printf("Error setting kernel argument 0\n");
+        quit = 1;
+        return NULL;
+    }
+
+    ret = clSetKernelArg(cl->kernel, 1, sizeof(cl_mem), (void*)&cl->viewParams_buf);
+    if (ret != CL_SUCCESS)
+    {
+        printf("Error setting kernel argument 1\n");
+        quit = 1;
+        return NULL;
+    }
+
+    ret = clSetKernelArg(cl->kernel, 2, sizeof(cl_mem), (void*)&cl->colors_buf);
+    if (ret != CL_SUCCESS)
+    {
+        printf("Error setting kernel argument 2\n");
         quit = 1;
         return NULL;
     }
@@ -284,7 +295,6 @@ void quitOpenCL(cl_s* cl)
 {
     clReleaseMemObject(cl->screenPoints_buf);
     clReleaseMemObject(cl->viewParams_buf);
-    clReleaseMemObject(cl->funnyNumber_buf);
     clReleaseMemObject(cl->colors_buf);
 
     clReleaseKernel(cl->kernel);
@@ -346,8 +356,6 @@ Uint32* mapMandelbrotSet(cl_s* cl)
     // on essaye tu de tasser ca dans l'init?
     ret = clEnqueueWriteBuffer(cl->commandQueue, cl->viewParams_buf, CL_TRUE, 0,
                          4 * sizeof(double), &view, 0, NULL, NULL);
-    ret = clEnqueueWriteBuffer(cl->commandQueue, cl->colors_buf, CL_TRUE, 0,
-                         sizeof(int), pixels, 0, NULL, NULL);
     if (ret != CL_SUCCESS)
     {
         printf("Error writing to buffers\n");
@@ -356,9 +364,9 @@ Uint32* mapMandelbrotSet(cl_s* cl)
     }
 
     // Execute kernel
-    ret = clEnqueueNDRangeKernel(cl->commandQueue, cl->kernel, 1, NULL,
-                           &cl->globalPixelCount, &cl->localPixelCount, 0,
-                           NULL, NULL);
+    size_t globalWorkSize[1] = {cl->globalPixelCount};
+    size_t localWorkSize[1] = {cl->localPixelCount};
+    ret = clEnqueueNDRangeKernel(cl->commandQueue, cl->kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
     if (ret != CL_SUCCESS)
     {
         printf("Error executing kernel\n");

@@ -45,7 +45,6 @@ typedef struct
 
     cl_mem screenPoints_buf;
     cl_mem viewParams_buf;
-    cl_mem funnyNumber_buf;
     cl_mem colors_buf;
 
     size_t globalPixelCount;
