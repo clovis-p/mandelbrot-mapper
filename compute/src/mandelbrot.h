@@ -5,7 +5,6 @@
 #ifndef MANDELBROT_MAPPER_MANDELBROT_H
 #define MANDELBROT_MAPPER_MANDELBROT_H
 
-#include <SDL2/SDL.h>
 #include <CL/cl.h>
 
 #include "main.h"
