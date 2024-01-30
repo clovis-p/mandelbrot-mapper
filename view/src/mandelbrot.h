@@ -30,5 +30,6 @@ typedef struct
 } view_s;
 
 extern view_s view;
+extern uint32_t* pixels;
 
 #endif //MANDELBROT_MAPPER_MANDELBROT_H

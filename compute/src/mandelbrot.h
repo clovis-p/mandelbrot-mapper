@@ -52,7 +52,7 @@ typedef struct
 
 cl_s* initOpenCL();
 void quitOpenCL(cl_s* cl);
-uint32_t* mapMandelbrotSet(cl_s* cl);
+void mapMandelbrotSet(cl_s* cl);
 
 extern view_s view;
 extern uint32_t* pixels;

@@ -3,14 +3,43 @@
 //
 
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include "main.h"
 #include "events.h"
 #include "mandelbrot.h"
 
+uint32_t* pixels;
+
 int main()
 {
-    printf("view\n");
+    setbuf(stdout, NULL);
+
+    printf("Starting view process\n");
+
+    printf("Waiting for compute process to open pipe\n");
+    int fd;
+    /*
+    if (mkfifo("/tmp/mandelbrot_pipe", 0666) == -1)
+    {
+        printf("Error creating pipe: %s\n", strerror(errno));
+        perror("mkfifo");
+        return 1;
+    }*/
+    fd = open("/tmp/mandelbrot_pipe", O_RDWR);
+    if (fd == -1)
+    {
+        printf("Error opening frames pipe: %s\n", strerror(errno));
+        perror("mkfifo");
+        return 1;
+    }
+    int status = 0;
+
+    printf("Initializing SDL\n");
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -46,10 +75,32 @@ int main()
 
     allocatePixels();
 
+    mandelbrotTexture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+                                          RESOLUTION_X, RESOLUTION_Y);
+
     while (!quit)
     {
         ticksBefore = SDL_GetTicks();
-        mandelbrotTexture = mapMandelbrotSet(ren);
+        //mandelbrotTexture = mapMandelbrotSet(ren);
+
+        if (pixels[640 * 240 + 320] != 0)
+        {
+            printf("\n%x\n", pixels[RESOLUTION_X * RESOLUTION_Y / 2]);
+        }
+        else
+        {
+            printf(".");
+        }
+
+        status = 1;
+        //printf("Writing status = %d                        \r", status);
+        write(fd, &status, sizeof(int));
+        //printf("Waiting for compute process to write pixels\r");
+        //printf(".");
+        read(fd, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
+
+        SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(Uint32));
+
         elapsedTime = SDL_GetTicks() - ticksBefore;
 
         //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
@@ -60,8 +111,12 @@ int main()
 
     freePixels();
 
+    close(fd);
+    unlink("/tmp/mandelbrot_pipe");
+
     SDL_WaitThread(eventThread, NULL);
 
+    SDL_DestroyTexture(mandelbrotTexture);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();

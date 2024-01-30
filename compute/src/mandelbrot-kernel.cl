@@ -45,10 +45,15 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
         if (zReal * zReal + zImag * zImag > unstableThreshold)
         {
             isInsideOfMandelbrotSet = 1;
+            break;
         }
     }
-
-    if (isInsideOfMandelbrotSet)
+/*
+    if (i == 150)
+    {
+        colors[i] = 123456;
+    }
+    else if (isInsideOfMandelbrotSet)
     {
         uint hexValue = (FUNNY_NUMBER * iterations * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
         colors[i] = hexValue;
@@ -57,4 +62,28 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
     {
         colors[i] = 0x000000;
     }
+    */
+    /*
+    if (isInsideOfMandelbrotSet)
+    {
+        colors[i] = 0x000000;
+    }
+    else
+    {
+        colors[i] = iterations;
+    }
+    */
+    //if (y == 240 && x == 320)
+        //printf("(%f, %f): %f, %f, i = %d\n", x, y, mandelbrotX, mandelbrotY, iterations);
+
+    //colors[i] = iterations / 512 * 0xFFFFFF;
+
+    colors[i] = iterations * 83865;
+/*
+    if (colors[i] != 0)
+    {
+        printf("%d - ", colors[i]);
+    }
+*/
+    //colors[i] = 0xAAAAAA;
 }

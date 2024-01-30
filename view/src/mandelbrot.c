@@ -32,8 +32,6 @@ view_s view = {RESOLUTION_X, RESOLUTION_Y,
 #define INITIAL_MAX_ITERATIONS 512
 int maxIterations = INITIAL_MAX_ITERATIONS;
 
-Uint32* pixels;
-
 void allocatePixels()
 {
     pixels = (Uint32*)malloc(RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32));
@@ -80,8 +78,13 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
             currentPixelD.x = (double)currentPixel.x;
             currentPixelD.y = (double)currentPixel.y;
             mandelbrotCoords = convertScreenPointToMandelbrotPoint(currentPixelD, view.viewWidth, view.viewHeight, view.centerPoint);
+            printf("currentPixelD.x = %lf, currentPixelD.y = %lf\n", currentPixelD.x, currentPixelD.y);
+            printf("view.viewWidth = %lf, view.viewHeight = %lf\n", view.viewWidth, view.viewHeight);
+            printf("view.centerPoint.x = %lf, view.centerPoint.y = %lf\n", view.centerPoint.x, view.centerPoint.y);
+            printf("mandelbrotCoords.x = %lf, mandelbrotCoords.y = %lf\n", mandelbrotCoords.x, mandelbrotCoords.y);
 
             color = assignColorToMandelbrotPoint(mandelbrotCoords);
+            printf("\n");
 
             pixels[currentPixel.y * RESOLUTION_X + currentPixel.x] = color.r << 24 | color.g << 16 | color.b << 8 | color.a;
         }
@@ -141,12 +144,14 @@ static Uint32 isOutsideOfMandelbrotSet(double re, double im)
         // If the magnitude of z becomes too large, consider it unstable
         if (zReal * zReal + zImag * zImag > UNSTABLE_THRESHOLD)
         {
+            printf("re = %lf, im = %lf\n%d\n", re, im, i);
             // If the point is not in the Mandelbrot set, we return the number of iterations it took before the
             // unstable threshold was passed. This will be used to assign a color to the current pixel.
             return i;
         }
     }
 
+    printf("re = %lf, im = %lf\n", re, im);
     return 0; // Point in Mandelbrot set
 }
 

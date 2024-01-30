@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mandelbrot.h"
 #include "main.h"
@@ -236,18 +237,18 @@ void freePixels()
     free(pixels);
 }
 
-uint32_t* mapMandelbrotSet(cl_s* cl)
+void mapMandelbrotSet(cl_s* cl)
 {
+    uint32_t debugPixels[RESOLUTION_X * RESOLUTION_Y];
+
     cl_int ret;
 
-    // on essaye tu de tasser ca dans l'init?
     ret = clEnqueueWriteBuffer(cl->commandQueue, cl->viewParams_buf, CL_TRUE, 0,
                          4 * sizeof(double), &view, 0, NULL, NULL);
     if (ret != CL_SUCCESS)
     {
         printf("Error writing to buffers\n");
         quit = 1;
-        return NULL;
     }
 
     // Execute kernel
@@ -258,21 +259,33 @@ uint32_t* mapMandelbrotSet(cl_s* cl)
     {
         printf("Error executing kernel\n");
         quit = 1;
-        return NULL;
     }
 
     // Read the results
     ret = clEnqueueReadBuffer(cl->commandQueue, cl->colors_buf, CL_TRUE, 0,
-                        RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t), pixels, 0,
+                        RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t), debugPixels, 0,
                         NULL, NULL);
     if (ret != CL_SUCCESS)
     {
         printf("Error reading from colors_buf\n");
         quit = 1;
-        return NULL;
     }
+/*
+    for (int i = 0; i < 100; i++)
+    {
+        printf("%x - ", debugPixels[i]);
+    }
+*/
+    memcpy(pixels, debugPixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
 
-    return pixels;
+/*
+    for (int i = 0; i < 15; i++)
+    {
+        //int j = i * 128;
+        printf("Pixel %d: %x\n", i, pixels[i]);
+    }
+*/
+    //printf("0x%x\n", pixels[240 * 640 + 320]);
 }
 
 void zoomInViewSize()
