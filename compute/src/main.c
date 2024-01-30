@@ -3,9 +3,10 @@
 //
 
 #include <stdio.h>
-#include <time.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "mandelbrot.h"
@@ -37,12 +38,11 @@ int main()
 
     printf("\nStarting Mandelbrot set computation\n");
 
-    clock_t start, end;
-    double cpu_time_used;
+    struct timeval start, end;
 
     while (!quit)
     {
-        start = clock();
+        gettimeofday(&start, NULL);
 
         memcpy(pixels, pixelsTemp, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
 
@@ -53,11 +53,15 @@ int main()
             quit = 1;
         }
 
-        end = clock();
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        printf("Time elapsed: %fms\n", cpu_time_used * 1000);
+        gettimeofday(&end, NULL);
+
+        long seconds = (end.tv_sec - start.tv_sec);
+        long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+
+        printf("Completed loop in %ld.%06lds\n", seconds, micros);
     }
 
+    free(pixelsTemp);
     freePixels();
     quitOpenCL(cl);
 
