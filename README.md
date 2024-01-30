@@ -1,5 +1,7 @@
 # Mandelbrot Mapper
-Renders the Mandelbrot set.
+WIP
+
+Renders the Mandelbrot set with GPU acceleration.
 
 ## Controls
 * Arrow keys to move around
@@ -8,7 +10,7 @@ Renders the Mandelbrot set.
 * ESC key : quit
 
 ## Performance
-Expect anywhere between 0.2 to 30fps depending on the resolution, your hardware and the complexity of what is being rendered. There is no GPU acceleration.
+This is still a work in progress. Computing a frame takes about 20ms at best on my machine, but that doesn't include the time it will take to render a frame, and that's not working yet.
 
 ## Screenshots
 ![Screenshot](https://raw.githubusercontent.com/clovis-p/mandelbrot-mapper/main/screenshots/screenshot.png)
