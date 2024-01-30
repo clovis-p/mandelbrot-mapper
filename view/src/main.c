@@ -13,7 +13,7 @@
 #include "events.h"
 #include "mandelbrot.h"
 
-uint32_t* pixels;
+//uint32_t* pixels;
 
 int main()
 {
@@ -73,7 +73,7 @@ int main()
 
     SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
 
-    allocatePixels();
+    //allocatePixels();
 
     mandelbrotTexture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
                                           RESOLUTION_X, RESOLUTION_Y);
@@ -82,6 +82,8 @@ int main()
     {
         ticksBefore = SDL_GetTicks();
         //mandelbrotTexture = mapMandelbrotSet(ren);
+
+        uint32_t pixels[RESOLUTION_X * RESOLUTION_Y];
 
         if (pixels[640 * 240 + 320] != 0)
         {
@@ -92,14 +94,31 @@ int main()
             printf(".");
         }
 
-        status = 1;
-        //printf("Writing status = %d                        \r", status);
-        write(fd, &status, sizeof(int));
-        //printf("Waiting for compute process to write pixels\r");
-        //printf(".");
-        read(fd, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
+        //status = 1;
+        //write(fd, &status, sizeof(int));
 
-        SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(Uint32));
+        ssize_t totalBytesRead = 0;
+        ssize_t bytesRead = 0;
+        while (totalBytesRead < RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t))
+        {
+            bytesRead = read(fd, pixels + totalBytesRead / sizeof(uint32_t), RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t) - totalBytesRead);
+            if (bytesRead == -1)
+            {
+                printf("Error reading from pipe: %s\n", strerror(errno));
+            }
+            else
+            {
+                printf("Read %ld (+%ld) bytes for a total of %ld bytes\n", totalBytesRead, bytesRead, (RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t)));
+            }
+
+            totalBytesRead += bytesRead;
+        }
+
+        printf("bytesRead = %d\n", bytesRead);
+        uint32_t debugPixels[RESOLUTION_X * RESOLUTION_Y];
+        memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
+
+        SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(uint32_t));
 
         elapsedTime = SDL_GetTicks() - ticksBefore;
 
@@ -109,7 +128,7 @@ int main()
         SDL_RenderPresent(ren);
     }
 
-    freePixels();
+    //freePixels();
 
     close(fd);
     unlink("/tmp/mandelbrot_pipe");

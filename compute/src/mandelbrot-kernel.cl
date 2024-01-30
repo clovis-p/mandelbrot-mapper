@@ -78,7 +78,14 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
 
     //colors[i] = iterations / 512 * 0xFFFFFF;
 
-    colors[i] = iterations * 83865;
+    if (!isInsideOfMandelbrotSet)
+    {
+        colors[i] = 0x000000;
+    }
+    else
+    {
+        colors[i] = iterations * 83865;
+    }
 /*
     if (colors[i] != 0)
     {

@@ -32,6 +32,7 @@ view_s view = {RESOLUTION_X, RESOLUTION_Y,
 #define INITIAL_MAX_ITERATIONS 512
 int maxIterations = INITIAL_MAX_ITERATIONS;
 
+/*
 void allocatePixels()
 {
     pixels = (Uint32*)malloc(RESOLUTION_X * RESOLUTION_Y * sizeof(Uint32));
@@ -41,7 +42,8 @@ void freePixels()
 {
     free(pixels);
 }
-
+*/
+/*
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 {
     SDL_Texture* mandelbrotTexture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888,
@@ -94,7 +96,7 @@ SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren)
 
     return mandelbrotTexture;
 }
-
+*/
 void zoomInViewSize()
 {
     view.viewWidth /= 1.25;

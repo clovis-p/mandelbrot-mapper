@@ -9,8 +9,8 @@
 
 #include "main.h"
 
-void allocatePixels();
-void freePixels();
+//void allocatePixels();
+//void freePixels();
 
 SDL_Texture* mapMandelbrotSet(SDL_Renderer* ren);
 void zoomInViewSize();
@@ -30,6 +30,6 @@ typedef struct
 } view_s;
 
 extern view_s view;
-extern uint32_t* pixels;
+//extern uint32_t* pixels;
 
 #endif //MANDELBROT_MAPPER_MANDELBROT_H

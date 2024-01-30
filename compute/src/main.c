@@ -67,30 +67,45 @@ int main()
     memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
     debugPixels[RESOLUTION_X * RESOLUTION_Y - 1] = 0xFFFFFF;
 
+    status = 1;
+
     while (!quit)
     {
-        read(fd, &status, sizeof(int));
+        //read(fd, &status, sizeof(int));
 
-        if (status == 1)
-        {
+        printf("Let's go!\n");
+
+        if (status == 1) {
             printf("status = %d\n", status);
             gettimeofday(&start, NULL);
 
             mapMandelbrotSet(cl);
-            if (pixels == NULL)
-            {
+            if (pixels == NULL) {
                 printf("Error mapping mandelbrot set\n");
                 quit = 1;
             }
 
             printf("2: %x\n", pixels[640 * 240 + 320]);
-            write(fd, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
-            //int pos = 640 * 240 + 320;
-            int pos = start.tv_sec * 10000000 % (RESOLUTION_X * RESOLUTION_Y);
-            printf("pos = %d\n", pos);
-            printf("%x\n", pixels[pos]);
+            memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
 
-            //memcpy(pixels, pixelsTemp, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
+            ssize_t totalBytesSent = 0;
+            ssize_t bytesSent = 0;
+            while (totalBytesSent < RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t))
+            {
+                bytesSent = write(fd, pixels + totalBytesSent / sizeof(uint32_t), RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t) - totalBytesSent);
+                if (bytesSent == -1)
+                {
+                    printf("Error writing to pipe: %s\n", strerror(errno));
+                }
+                else
+                {
+                    printf("Sent %ld (+%ld) bytes for a total of %ld bytes\n", totalBytesSent, bytesSent, (RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t)));
+                }
+
+                totalBytesSent += bytesSent;
+            }
+
+            printf("bytesSent = %d\n", bytesSent);
 
             gettimeofday(&end, NULL);
 
@@ -99,7 +114,10 @@ int main()
 
             printf("Completed frame in %ld.%06lds\n", seconds, micros);
             printf("Waiting for view process to send parameters\n");
+            //status = 0;
         }
+
+        //read(fd, &status, sizeof(int));
     }
 
     close(fd);
