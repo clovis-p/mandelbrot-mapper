@@ -20,6 +20,8 @@ int main()
 {
     setbuf(stdout, NULL);
 
+    printf("compute\n");
+
     openCLMutex = SDL_CreateMutex();
     if (openCLMutex == NULL)
     {
