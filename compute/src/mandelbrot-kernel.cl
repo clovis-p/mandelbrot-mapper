@@ -4,6 +4,8 @@
 #define RESOLUTION_Y 480
 
 #define FUNNY_NUMBER (-985432)
+//#define FUNNY_NUMBER (-123456)
+//#define FUNNY_NUMBER (-51234)
 
 #define LAST_X_PIXEL (RESOLUTION_X - 1)
 #define LAST_Y_PIXEL (RESOLUTION_Y - 1)
@@ -15,9 +17,9 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
     double x = screenPoints[i * 2];
     double y = screenPoints[i * 2 + 1];
 
-    double viewWidth = viewParams[0];
-    double viewHeight = viewParams[1];
-    double centerX = viewParams[2];
+    double viewWidth = viewParams[0];// / 10;
+    double viewHeight = viewParams[1];// / 10;
+    double centerX = viewParams[2];// - 200;
     double centerY = viewParams[3];
 
     double yRange = (double)RESOLUTION_Y / RESOLUTION_X;
@@ -28,7 +30,7 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
     double zReal = 0.0;
     double zImag = 0.0;
 
-    int maxIterations = INITIAL_MAX_ITERATIONS;
+    int maxIterations = INITIAL_MAX_ITERATIONS;// * 10;
     int unstableThreshold = UNSTABLE_THRESHOLD;
 
     int isInsideOfMandelbrotSet = 0;
@@ -48,35 +50,6 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
             break;
         }
     }
-/*
-    if (i == 150)
-    {
-        colors[i] = 123456;
-    }
-    else if (isInsideOfMandelbrotSet)
-    {
-        uint hexValue = (FUNNY_NUMBER * iterations * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
-        colors[i] = hexValue;
-    }
-    else
-    {
-        colors[i] = 0x000000;
-    }
-    */
-    /*
-    if (isInsideOfMandelbrotSet)
-    {
-        colors[i] = 0x000000;
-    }
-    else
-    {
-        colors[i] = iterations;
-    }
-    */
-    //if (y == 240 && x == 320)
-        //printf("(%f, %f): %f, %f, i = %d\n", x, y, mandelbrotX, mandelbrotY, iterations);
-
-    //colors[i] = iterations / 512 * 0xFFFFFF;
 
     if (!isInsideOfMandelbrotSet)
     {
@@ -84,13 +57,7 @@ __kernel void computeMandelbrotPixel(__global const double* screenPoints, __glob
     }
     else
     {
-        colors[i] = iterations * 83865;
+        uint hexValue = (FUNNY_NUMBER * iterations * 256 / INITIAL_MAX_ITERATIONS) % 0xFFFFFF;
+        colors[i] = hexValue;
     }
-/*
-    if (colors[i] != 0)
-    {
-        printf("%d - ", colors[i]);
-    }
-*/
-    //colors[i] = 0xAAAAAA;
 }

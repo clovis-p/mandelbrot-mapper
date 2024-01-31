@@ -15,6 +15,10 @@
 
 //uint32_t* pixels;
 
+int sendViewParams();
+
+int viewParamsChanged = 0;
+
 int main()
 {
     setbuf(stdout, NULL);
@@ -72,6 +76,7 @@ int main()
     SDL_Texture* mandelbrotTexture;
 
     SDL_Thread* eventThread = SDL_CreateThread(handleEvents, "Event Thread", NULL);
+    SDL_Thread* viewParamsThread = SDL_CreateThread(sendViewParams, "View Params Thread", NULL);
 
     //allocatePixels();
 
@@ -80,22 +85,9 @@ int main()
 
     while (!quit)
     {
-        ticksBefore = SDL_GetTicks();
-        //mandelbrotTexture = mapMandelbrotSet(ren);
+        //ticksBefore = SDL_GetTicks();
 
         uint32_t pixels[RESOLUTION_X * RESOLUTION_Y];
-
-        if (pixels[640 * 240 + 320] != 0)
-        {
-            printf("\n%x\n", pixels[RESOLUTION_X * RESOLUTION_Y / 2]);
-        }
-        else
-        {
-            printf(".");
-        }
-
-        //status = 1;
-        //write(fd, &status, sizeof(int));
 
         ssize_t totalBytesRead = 0;
         ssize_t bytesRead = 0;
@@ -106,39 +98,70 @@ int main()
             {
                 printf("Error reading from pipe: %s\n", strerror(errno));
             }
-            else
-            {
-                printf("Read %ld (+%ld) bytes for a total of %ld bytes\n", totalBytesRead, bytesRead, (RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t)));
-            }
 
             totalBytesRead += bytesRead;
         }
 
-        printf("bytesRead = %d\n", bytesRead);
-        uint32_t debugPixels[RESOLUTION_X * RESOLUTION_Y];
-        memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
+        //uint32_t debugPixels[RESOLUTION_X * RESOLUTION_Y];
+        //memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
 
         SDL_UpdateTexture(mandelbrotTexture, NULL, pixels, RESOLUTION_X * sizeof(uint32_t));
-
-        elapsedTime = SDL_GetTicks() - ticksBefore;
-
-        //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-        //SDL_RenderClear(ren);
         SDL_RenderCopy(ren, mandelbrotTexture, NULL, NULL);
         SDL_RenderPresent(ren);
-    }
 
-    //freePixels();
+        //elapsedTime = SDL_GetTicks() - ticksBefore;
+        //printf("Frame time: %d ms\n", elapsedTime);
+    }
 
     close(fd);
     unlink("/tmp/mandelbrot_pipe");
 
     SDL_WaitThread(eventThread, NULL);
+    SDL_WaitThread(viewParamsThread, NULL);
 
     SDL_DestroyTexture(mandelbrotTexture);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
+
+    return 0;
+}
+
+int sendViewParams()
+{
+    printf("Starting view params thread\n");
+
+    int fd = open("/tmp/mandelbrot_pipe_parameters", O_WRONLY);
+    if (fd == -1)
+    {
+        printf("Error opening parameters pipe: %s\n", strerror(errno));
+        perror("mkfifo");
+        return -1;
+    }
+
+    while (!quit)
+    {
+        if (viewParamsChanged)
+        {
+            ssize_t totalBytesSent = 0;
+            ssize_t bytesSent = 0;
+            while (totalBytesSent < 4 * sizeof(double))
+            {
+                bytesSent = write(fd, &view, 4 * sizeof(double) - totalBytesSent);
+                if (bytesSent == -1)
+                {
+                    printf("Error writing to pipe: %s\n", strerror(errno));
+                }
+
+                totalBytesSent += bytesSent;
+            }
+
+            viewParamsChanged = 0;
+        }
+    }
+
+    close(fd);
+    unlink("/tmp/mandelbrot_pipe_parameters");
 
     return 0;
 }

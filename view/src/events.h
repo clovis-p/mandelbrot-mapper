@@ -7,4 +7,6 @@
 
 int handleEvents();
 
+extern int viewParamsChanged;
+
 #endif //MANDELBROT_MAPPER_EVENTS_H

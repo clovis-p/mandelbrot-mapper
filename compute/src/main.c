@@ -8,14 +8,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "main.h"
 #include "mandelbrot.h"
 
 int quit = 0;
+
+void* getViewParams();
 
 int main()
 {
@@ -54,6 +56,9 @@ int main()
         quit = 1;
     }
 
+    pthread_t viewParamsThread;
+    int ret = pthread_create(&viewParamsThread, NULL, getViewParams, NULL);
+
     printf("\nStarting Mandelbrot set computation\nWaiting for view process to send parameters\n");
 
     struct timeval start, end;
@@ -76,7 +81,7 @@ int main()
         printf("Let's go!\n");
 
         if (status == 1) {
-            printf("status = %d\n", status);
+            //printf("status = %d\n", status);
             gettimeofday(&start, NULL);
 
             mapMandelbrotSet(cl);
@@ -85,7 +90,7 @@ int main()
                 quit = 1;
             }
 
-            printf("2: %x\n", pixels[640 * 240 + 320]);
+            //printf("2: %x\n", pixels[640 * 240 + 320]);
             memcpy(debugPixels, pixels, RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t));
 
             ssize_t totalBytesSent = 0;
@@ -97,15 +102,13 @@ int main()
                 {
                     printf("Error writing to pipe: %s\n", strerror(errno));
                 }
-                else
-                {
-                    printf("Sent %ld (+%ld) bytes for a total of %ld bytes\n", totalBytesSent, bytesSent, (RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t)));
-                }
+                //else
+                //{
+                //    printf("Sent %ld (+%ld) bytes for a total of %ld bytes\n", totalBytesSent, bytesSent, (RESOLUTION_X * RESOLUTION_Y * sizeof(uint32_t)));
+                //}
 
                 totalBytesSent += bytesSent;
             }
-
-            printf("bytesSent = %d\n", bytesSent);
 
             gettimeofday(&end, NULL);
 
@@ -113,7 +116,7 @@ int main()
             long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
 
             printf("Completed frame in %ld.%06lds\n", seconds, micros);
-            printf("Waiting for view process to send parameters\n");
+            //printf("Waiting for view process to send parameters\n");
             //status = 0;
         }
 
@@ -127,4 +130,42 @@ int main()
     quitOpenCL(cl);
 
     return 0;
+}
+
+void* getViewParams()
+{
+    printf("Starting view params thread\n");
+
+    int fd;
+    if (mkfifo("/tmp/mandelbrot_pipe_parameters", 0666) == -1)
+    {
+        printf("Error creating parameters pipe: %s\n", strerror(errno));
+        perror("mkfifo");
+        return NULL;
+    }
+    fd = open("/tmp/mandelbrot_pipe_parameters", O_RDONLY);
+    if (fd == -1)
+    {
+        printf("Error opening parameters pipe: %s\n", strerror(errno));
+        perror("mkfifo");
+        return NULL;
+    }
+
+    while (!quit)
+    {
+        ssize_t totalBytesRead = 0;
+        ssize_t bytesRead = 0;
+        while (totalBytesRead < 4 * sizeof(double))
+        {
+            bytesRead = read(fd, &view, 4 * sizeof(double) - totalBytesRead);
+            if (bytesRead == -1)
+            {
+                printf("Error writing to pipe: %s\n", strerror(errno));
+            }
+            totalBytesRead += bytesRead;
+        }
+    }
+
+    close(fd);
+    return NULL;
 }

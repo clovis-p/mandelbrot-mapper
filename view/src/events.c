@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "mandelbrot.h"
+#include "events.h"
 
 int quit = 0;
 SDL_Point mouse;
@@ -32,32 +33,38 @@ int handleEvents()
         if (shouldPerformKeyAction(SDL_SCANCODE_EQUALS))
         {
             zoomInViewSize();
+            viewParamsChanged = 1;
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_MINUS))
         {
             zoomOutViewSize();
+            viewParamsChanged = 1;
         }
 
 
         if (shouldPerformKeyAction(SDL_SCANCODE_RIGHT))
         {
             view.centerPoint.x += 50 / (RESOLUTION_X / view.viewWidth);
+            viewParamsChanged = 1;
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_LEFT))
         {
             view.centerPoint.x -= 50 / (RESOLUTION_X / view.viewWidth);
+            viewParamsChanged = 1;
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_UP))
         {
             view.centerPoint.y -= 50 / (RESOLUTION_Y / view.viewHeight);
+            viewParamsChanged = 1;
         }
 
         if (shouldPerformKeyAction(SDL_SCANCODE_DOWN))
         {
             view.centerPoint.y += 50 / (RESOLUTION_Y / view.viewHeight);
+            viewParamsChanged = 1;
         }
 
         if (event.key.keysym.sym == SDLK_ESCAPE)
